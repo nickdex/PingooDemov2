@@ -23,10 +23,12 @@ import java.util.List;
  * Use the {@link ContactFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
+public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener
+{
 
-    private static final String TAG = "Contact_Fragment";
-    private OnContactFragmentInteractionListener mListener;
+    public static final String TAG = "Contact_Fragment";
+
+    OnContactFragmentInteractionListener mListener;
 
     private ListView listView;
     private CustomAdapter customAdapter;
@@ -34,27 +36,29 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
 
     private List<CustomItem> contactItems = new ArrayList<>();
 
-    public ContactFragment() {
+
+    public ContactFragment()
+    {
         // Required empty public constructor
     }
 
-    public static ContactFragment newInstance() {
-        
+    public static ContactFragment newInstance()
+    {
+
         return new ContactFragment();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
-
-        contactItems.add(new CustomItem("1",0));
-        contactItems.add(new CustomItem("2",0));
-        contactItems.add(new CustomItem("3",2));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             Bundle savedInstanceState)
+    {
+
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_contact, container, false);
 
@@ -66,37 +70,41 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
         return v;
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onContactFragmentInteraction(uri);
-        }
-    }
-
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(Context context)
+    {
         super.onAttach(context);
-        if (context instanceof OnContactFragmentInteractionListener) {
+        if (context instanceof OnContactFragmentInteractionListener)
+        {
             mListener = (OnContactFragmentInteractionListener) context;
-        } else {
+        } else
+        {
             throw new RuntimeException(context.toString()
                     + " must implement OnContactFragmentInteractionListener");
         }
     }
 
     @Override
-    public void onDetach() {
+    public void onDetach()
+    {
         super.onDetach();
         mListener = null;
     }
 
     @Override
-    public void onRefresh() {
-        CustomItem item = new CustomItem("Hello",1);
-        contactItems.clear();
-        contactItems.add(0, item);
-        Log.i(TAG, item.toString()+" added");
-        customAdapter.notifyDataSetChanged();
-        Log.i(TAG, "Adapter notified");
+    public void onRefresh()
+    {
+        DatabaseUtility utility = DatabaseUtility.newInstance(getContext());
+        List<CustomItem> list = utility.getItemListFromDatabase(TAG);
+        if (list != null)
+        {
+            contactItems.clear();
+            contactItems.addAll(list);
+            customAdapter.notifyDataSetChanged();
+            Log.i(TAG, "Adapter notified");
+        }
+
+        Log.d(TAG, "Refresh Complete");
         refreshLayout.setRefreshing(false);
     }
 
@@ -110,7 +118,8 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnContactFragmentInteractionListener {
+    public interface OnContactFragmentInteractionListener
+    {
         // TODO: Update argument type and name
         void onContactFragmentInteraction(Uri uri);
     }

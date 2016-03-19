@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -20,28 +19,23 @@ public class DatabaseUtility extends SQLiteOpenHelper
     private static final String NAME = "ping.db";
 
     private static final int VERSION = 1;
-    private static final String TAG = "Processor";
-    private static boolean firstRun = false;
+    private static final String TAG = "DatabaseUtility";
 
-    private static final String CONTACT_NAME = "NAME";
     private final String CONTACT_TABLE = "CONTACT";
-
     private final String MUSIC_TABLE = "MUSIC";
-    private final String MUSIC_TITLE = "TITLE";
-    private final String IS_NEW_MUSIC = "IS_NEW";
+
+    private final String ID = "_ID";
+    private final String TITLE = "NAME";
+    private final String IS_NEW = "IS_NEW";
 
     public final static int OLD = 0;
     public final static int NEW = 1;
     public final static int DELETED = 2;
     public final static int CHANGED = 3;
 
-    private SQLiteDatabase database;
-    private Context context;
-
     public DatabaseUtility(Context context)
     {
         super(context, NAME, null, VERSION);
-        this.context = context;
 
     }
 
@@ -54,8 +48,8 @@ public class DatabaseUtility extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + MUSIC_TABLE + " ( " + MUSIC_TITLE + " TEXT PRIMARY KEY, " + IS_NEW_MUSIC + " INTEGER);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + CONTACT_TABLE + " ( " + CONTACT_NAME + " TEXT PRIMARY KEY, " + IS_NEW_MUSIC + " INTEGER);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + MUSIC_TABLE + " ( " + ID + " TEXT PRIMARY KEY, " + TITLE + " TEXT, " + IS_NEW + " INTEGER);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + CONTACT_TABLE + " ( " + ID + " TEXT PRIMARY KEY, " + TITLE + " TEXT, " + IS_NEW + " INTEGER);");
     }
 
     @Override
@@ -66,73 +60,108 @@ public class DatabaseUtility extends SQLiteOpenHelper
         onCreate(db);
     }
 
-
-    public void insertList(List<CustomItem> fresh)
-    {
-        AsyncTask<List<CustomItem>, Void, Void> task = new AsyncTask<List<CustomItem>, Void, Void>()
-        {
-            @Override
-            protected Void doInBackground(List<CustomItem>... params)
-            {
-                List<CustomItem> fresh = params[0];
-                SQLiteDatabase db = getWritableDatabase();
-                Cursor cursor = db.query(MUSIC_TABLE, new String[]{MUSIC_TITLE, IS_NEW_MUSIC}, null, null, null, null, null);
-                if (cursor != null)
-                {
-                    if (cursor.getCount() == 0)
-                    {
-                        for (CustomItem item : fresh)
-                        {
-                            item.setInfo(NEW);
-                            insertItem(item, db);
-                        }
-                    } else
-                    {
-                        List<CustomItem> updatedList = getUpdatedItemList(getListFromDatabaseCursorToInsert(cursor), fresh);
-                        if (updatedList != null)
-                        {
-                            for (CustomItem item : updatedList)
-                            {
-                                insertItem(item, db);
-                            }
-                        }
-                    }
-                }
-
-                db.close();
-                return null;
-            }
-        };
-
-        task.execute(fresh);
-
-    }
-
-    public List<CustomItem> getItemListFromDatabase()
+    public void insertContactList(List<CustomItem> fresh)
     {
         SQLiteDatabase db = getWritableDatabase();
-        Cursor cursor = db.query(MUSIC_TABLE, new String[]{MUSIC_TITLE, IS_NEW_MUSIC}, null, null, null, null, null);
+        Cursor cursor = db.query(CONTACT_TABLE, new String[]{ID, TITLE, IS_NEW}, null, null, null, null, null);
+
         if (cursor != null)
         {
-            return getSortedList(getListFromDatabaseCursorToShow(cursor, db));
+            if (cursor.getCount() == 0)
+            {
+                for (CustomItem item : fresh)
+                {
+                    item.setInfo(NEW);
+                    insertContactItem(item, db);
+                }
+            } else
+            {
+                List<CustomItem> updatedList = getUpdatedItemList(getListFromDatabaseCursorToInsert(cursor), fresh);
+                if (updatedList != null)
+                {
+                    for (CustomItem item : updatedList)
+                    {
+                        insertContactItem(item, db);
+                    }
+                }
+            }
         }
+
+        db.close();
+    }
+
+
+    public void insertMusicList(List<CustomItem> fresh)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor = db.query(MUSIC_TABLE, new String[]{ID, TITLE, IS_NEW}, null, null, null, null, null);
+
+        if (cursor != null)
+        {
+            if (cursor.getCount() == 0)
+            {
+                for (CustomItem item : fresh)
+                {
+                    item.setInfo(NEW);
+                    insertMusicItem(item, db);
+                }
+            } else
+            {
+                List<CustomItem> updatedList = getUpdatedItemList(getListFromDatabaseCursorToInsert(cursor), fresh);
+                if (updatedList != null)
+                {
+                    for (CustomItem item : updatedList)
+                    {
+                        insertMusicItem(item, db);
+                    }
+                }
+            }
+        }
+
+        db.close();
+    }
+
+    public List<CustomItem> getItemListFromDatabase(String Tag)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        String table;
+        Cursor cursor;
+        switch (Tag)
+        {
+            case MusicFragment.TAG:
+                table = MUSIC_TABLE;
+                break;
+            case ContactFragment.TAG:
+                table = CONTACT_TABLE;
+                break;
+            default:
+                table = null;
+        }
+        cursor = db.query(table, new String[]{ID, TITLE, IS_NEW}, null, null, null, null, null);
+
+        if (cursor != null)
+        {
+            return getSortedList(getListFromDatabaseCursorToShow(cursor, db, table));
+        }
+
+        db.close();
         return null;
     }
 
-    private List<CustomItem> getSortedList(List<CustomItem> list) {
+    private List<CustomItem> getSortedList(List<CustomItem> list)
+    {
         List<CustomItem> tempList = new ArrayList<>();
-        for(CustomItem item : list)
+        for (CustomItem item : list)
         {
             if (item.getInfo() == OLD)
             {
                 tempList.add(item);
             }
         }
-        if(!tempList.isEmpty())
-        {
-            list.removeAll(tempList);
-            list.addAll(tempList);
-        }
+
+        list.removeAll(tempList);
+        list.addAll(tempList);
+
         return list;
     }
 
@@ -145,113 +174,80 @@ public class DatabaseUtility extends SQLiteOpenHelper
      */
     public List<CustomItem> getUpdatedItemList(List<CustomItem> old, List<CustomItem> fresh)
     {
-        List<CustomItem> tempList = new ArrayList<>();
-        List<CustomItem> readdedList = new ArrayList<>();
-        int flag;
-        //New Item
-        if (fresh.size() > old.size())
+        List<CustomItem> oldItems = new ArrayList<>();
+        List<CustomItem> changedItems = new ArrayList<>();
+
+        //New Item or Changed
+        if (fresh.size() >= old.size())
         {
-            flag = NEW;
-            tempList.addAll(fresh);
+//            flag = NEW;
             for (CustomItem itemFresh : fresh)
             {
                 for (CustomItem itemOld : old)
                 {
-                    if (itemFresh.getContent().equals(itemOld.getContent()))
+                    if (itemFresh.getId().equals(itemOld.getId()))
                     {
-                        tempList.remove(itemFresh);
-                        break;
-                    }
-                }
-            }
-
-            for (CustomItem item : tempList)
-            {
-                item.setInfo(flag);
-            }
-        }
-        //Deleted Item
-        else if (fresh.size() < old.size())
-        {
-
-            flag = DELETED;
-            for (CustomItem itemOld : old)
-            {
-                for (CustomItem itemFresh : fresh)
-                {
-                    if (itemFresh.getContent().equals(itemOld.getContent()))
-                    {
-                        tempList.add(itemOld);
-                        break;
-                    }
-                }
-            }
-            old.removeAll(tempList);
-            for (CustomItem item : old)
-            {
-                item.setInfo(flag);
-            }
-            for (CustomItem item : tempList)
-            {
-                item.setInfo(OLD);
-            }
-            tempList.addAll(0, old);
-
-        }
-//        Changed Item
-        else
-        {
-            flag = CHANGED;
-            tempList.addAll(fresh);
-            for (CustomItem itemFresh : fresh)
-            {
-                for (CustomItem itemOld : old)
-                {
-                    if (itemFresh.getContent().equals(itemOld.getContent()))
-                    {
-                        if (itemFresh.getInfo() == itemOld.getInfo())
+                        if (itemFresh.getContent().equals(itemOld.getContent()))
                         {
-                            tempList.remove(itemFresh);
+                            oldItems.add(itemFresh);
                         } else
                         {
-                            readdedList.add(itemFresh);
+                            changedItems.add(itemFresh);
                         }
                         break;
                     }
                 }
             }
-            if (tempList.isEmpty())
-            {
-                return null;
-            } else
-            {
-                fresh.removeAll(tempList);
-                for (CustomItem item : tempList)
-                {
-                    item.setInfo(flag);
-                }
 
-                if(!readdedList.isEmpty())
-                {
-                    fresh.removeAll(readdedList);
-                    tempList.removeAll(readdedList);
-                    for(CustomItem item : readdedList)
-                    {
-                        item.setInfo(NEW);
-                    }
-                    tempList.addAll(readdedList);
-                }
-
-                for (CustomItem item : fresh)
-                {
-                    item.setInfo(OLD);
-                }
-                tempList.addAll(fresh);
+            fresh.removeAll(oldItems);
+            fresh.removeAll(changedItems);
+            //Now fresh contains only new Items
+            for (CustomItem item : oldItems)
+            {
+                item.setInfo(OLD);
             }
+            for (CustomItem item : fresh)
+            {
+                item.setInfo(NEW);
+            }
+            for (CustomItem item : changedItems)
+            {
+                item.setInfo(CHANGED);
+            }
+
+            oldItems.addAll(0, changedItems);
+            oldItems.addAll(0, fresh);
+        }
+        //Deleted Item
+        else if (fresh.size() < old.size())
+        {
+            for (CustomItem itemOld : old)
+            {
+                for (CustomItem itemFresh : fresh)
+                {
+                    if (itemFresh.getId().equals(itemOld.getId()))
+                    {
+                        oldItems.add(itemOld);
+                        break;
+                    }
+                }
+            }
+
+            old.removeAll(oldItems);
+
+            for (CustomItem item : old)
+            {
+                item.setInfo(DELETED);
+            }
+            for (CustomItem item : oldItems)
+            {
+                item.setInfo(OLD);
+            }
+            oldItems.addAll(0, old);
+
         }
 
-
-        return tempList;
+        return oldItems;
     }
 
     public List<CustomItem> getListFromDatabaseCursorToInsert(Cursor cursor)
@@ -259,15 +255,14 @@ public class DatabaseUtility extends SQLiteOpenHelper
         if (cursor != null && cursor.getCount() > 0)
         {
             List<CustomItem> list = new ArrayList<>();
-            do
+            while (cursor.moveToNext())
             {
-                cursor.moveToNext();
-                String title = cursor.getString(0);
-                int info = cursor.getInt(1);
-                CustomItem item = new CustomItem(title, info);
+                String id = cursor.getString(0);
+                String title = cursor.getString(1);
+                int info = cursor.getInt(2);
+                CustomItem item = new CustomItem(id, title, info);
                 list.add(item);
-
-            } while (!cursor.isLast());
+            }
 
             return list;
         } else
@@ -277,24 +272,24 @@ public class DatabaseUtility extends SQLiteOpenHelper
     }
 
 
-    public List<CustomItem> getListFromDatabaseCursorToShow(Cursor cursor, SQLiteDatabase db)
+    public List<CustomItem> getListFromDatabaseCursorToShow(Cursor cursor, SQLiteDatabase db, String table)
     {
         if (cursor != null && cursor.getCount() > 0)
         {
             List<CustomItem> list = new ArrayList<>();
-            do
+            while (cursor.moveToNext())
             {
-                cursor.moveToNext();
-                String title = cursor.getString(0);
-                int info = cursor.getInt(1);
-                CustomItem item = new CustomItem(title, info);
+                String id = cursor.getString(0);
+                String title = cursor.getString(1);
+                int info = cursor.getInt(2);
+                CustomItem item = new CustomItem(id, title, info);
                 list.add(item);
 
-                if(item.getInfo() == DELETED) {
-                    db.delete(MUSIC_TABLE, IS_NEW_MUSIC +" = ?", new String[]{String.valueOf(item.getInfo())});
+                if (info == DELETED)
+                {
+                    db.delete(table, IS_NEW + " = ?", new String[]{String.valueOf(info)});
                 }
-
-            } while (!cursor.isLast());
+            }
 
             return list;
         } else
@@ -308,39 +303,73 @@ public class DatabaseUtility extends SQLiteOpenHelper
         if (cursor != null && cursor.getCount() > 0)
         {
             List<CustomItem> list = new ArrayList<>();
-            do
+            while (cursor.moveToNext())
             {
-                cursor.moveToNext();
-                String title = cursor.getString(0);
-                //OLD doesn't matter it will be replaced later when interacting with database
-                CustomItem item = new CustomItem(title, OLD);
-                list.add(item);
-            } while (!cursor.isLast());
 
-            return list;
-        } else
-        {
-            return null;
+                String id = cursor.getString(0);
+                String title = cursor.getString(1);
+                //OLD doesn't matter it will be replaced later when interacting with database
+                CustomItem item = new CustomItem(id, title, OLD);
+                list.add(item);
+            }
+
+            if (!list.isEmpty())
+            {
+                return list;
+            }
+
+            cursor.close();
         }
+
+        return null;
+
     }
 
-    private void insertItem(CustomItem item, SQLiteDatabase database)
+    private void insertContactItem(CustomItem item, SQLiteDatabase database)
     {
 
         ContentValues values = new ContentValues();
-        values.put(MUSIC_TITLE, item.getContent());
-        values.put(IS_NEW_MUSIC, item.getInfo());
+        values.put(ID, item.getId());
+        values.put(TITLE, item.getContent());
+        values.put(IS_NEW, item.getInfo());
+
+        try
+        {
+            database.insertOrThrow(CONTACT_TABLE, null, values);
+        } catch (SQLiteConstraintException e)
+        {
+            //Redundancy check
+            if (item.getInfo() == NEW)
+            {
+                values.put(IS_NEW, OLD);
+                Log.w(TAG, "Please check " + item.toString());
+            }
+            database.updateWithOnConflict(CONTACT_TABLE, values, ID + " = ?", new String[]{item.getId()}, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+        Log.i(TAG, item.toString());
+    }
+
+    private void insertMusicItem(CustomItem item, SQLiteDatabase database)
+    {
+
+        ContentValues values = new ContentValues();
+        values.put(ID, item.getId());
+        values.put(TITLE, item.getContent());
+        values.put(IS_NEW, item.getInfo());
 
         try
         {
             database.insertOrThrow(MUSIC_TABLE, null, values);
         } catch (SQLiteConstraintException e)
         {
-            if(item.getInfo() == NEW){
-                values.put(IS_NEW_MUSIC, OLD);
+            //Redundancy check
+            if (item.getInfo() == NEW)
+            {
+                values.put(IS_NEW, OLD);
+                Log.w(TAG, "Please check " + item.toString());
             }
-            database.updateWithOnConflict(MUSIC_TABLE, values, MUSIC_TITLE + " = ?", new String[]{item.getContent()}, SQLiteDatabase.CONFLICT_REPLACE);
+            database.updateWithOnConflict(MUSIC_TABLE, values, ID + " = ?", new String[]{item.getId()}, SQLiteDatabase.CONFLICT_REPLACE);
         }
-        Log.i(TAG, item.getContent() + " # " + item.getInfo());
+        Log.i(TAG, item.toString());
     }
 }
