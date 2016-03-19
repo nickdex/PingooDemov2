@@ -397,5 +397,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
         }
 
         db.execSQL("UPDATE " + table + " SET " + IS_NEW + " = " + OLD);
+
+        db.close();
     }
 }
