@@ -114,9 +114,10 @@ public class MusicFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         {
             musicItems.clear();
             musicItems.addAll(list);
+            customAdapter.notifyDataSetChanged();
+            Log.i(TAG, "Adapter notified");
         }
-        customAdapter.notifyDataSetChanged();
-        Log.i(TAG, "Adapter notified");
+        utility.setAllOld(TAG);
 
         Log.d(TAG, "Refresh Complete");
         refreshLayout.setRefreshing(false);

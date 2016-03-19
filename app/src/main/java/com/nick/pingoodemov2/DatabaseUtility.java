@@ -202,10 +202,13 @@ public class DatabaseUtility extends SQLiteOpenHelper
             fresh.removeAll(oldItems);
             fresh.removeAll(changedItems);
             //Now fresh contains only new Items
-            for (CustomItem item : oldItems)
-            {
-                item.setInfo(OLD);
-            }
+//            for (CustomItem item : oldItems)
+//            {
+//                if(item.getInfo() != NEW)
+//                {
+//                    item.setInfo(OLD);
+//                }
+//            }
             for (CustomItem item : fresh)
             {
                 item.setInfo(NEW);
@@ -215,8 +218,9 @@ public class DatabaseUtility extends SQLiteOpenHelper
                 item.setInfo(CHANGED);
             }
 
-            oldItems.addAll(0, changedItems);
-            oldItems.addAll(0, fresh);
+            fresh.addAll(changedItems);
+
+            return fresh;
         }
         //Deleted Item
         else if (fresh.size() < old.size())
@@ -239,15 +243,18 @@ public class DatabaseUtility extends SQLiteOpenHelper
             {
                 item.setInfo(DELETED);
             }
-            for (CustomItem item : oldItems)
-            {
-                item.setInfo(OLD);
-            }
-            oldItems.addAll(0, old);
-
+//            for (CustomItem item : oldItems)
+//            {
+//                if(item.getInfo() != DELETED)
+//                {
+//                    item.setInfo(OLD);
+//                }
+//            }
+//            oldItems.addAll(0, old);
+            return old;
         }
 
-        return oldItems;
+        return null;
     }
 
     public List<CustomItem> getListFromDatabaseCursorToInsert(Cursor cursor)
@@ -338,12 +345,12 @@ public class DatabaseUtility extends SQLiteOpenHelper
             database.insertOrThrow(CONTACT_TABLE, null, values);
         } catch (SQLiteConstraintException e)
         {
-            //Redundancy check
-            if (item.getInfo() == NEW)
-            {
-                values.put(IS_NEW, OLD);
-                Log.w(TAG, "Please check " + item.toString());
-            }
+//            //Redundancy check
+//            if (item.getInfo() == NEW)
+//            {
+//                values.put(IS_NEW, OLD);
+//                Log.w(TAG, "Please check " + item.toString());
+//            }
             database.updateWithOnConflict(CONTACT_TABLE, values, ID + " = ?", new String[]{item.getId()}, SQLiteDatabase.CONFLICT_REPLACE);
         }
         Log.i(TAG, item.toString());
@@ -362,14 +369,33 @@ public class DatabaseUtility extends SQLiteOpenHelper
             database.insertOrThrow(MUSIC_TABLE, null, values);
         } catch (SQLiteConstraintException e)
         {
-            //Redundancy check
-            if (item.getInfo() == NEW)
-            {
-                values.put(IS_NEW, OLD);
-                Log.w(TAG, "Please check " + item.toString());
-            }
+//            //Redundancy check
+//            if (item.getInfo() == NEW)
+//            {
+//                values.put(IS_NEW, OLD);
+//                Log.w(TAG, "Please check " + item.toString());
+//            }
             database.updateWithOnConflict(MUSIC_TABLE, values, ID + " = ?", new String[]{item.getId()}, SQLiteDatabase.CONFLICT_REPLACE);
         }
         Log.i(TAG, item.toString());
+    }
+
+    public void setAllOld(String Tag)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        String table;
+        switch (Tag)
+        {
+            case MusicFragment.TAG:
+                table = MUSIC_TABLE;
+                break;
+            case ContactFragment.TAG:
+                table = CONTACT_TABLE;
+                break;
+            default:
+                table = null;
+        }
+
+        db.execSQL("UPDATE " + table + " SET " + IS_NEW + " = " + OLD);
     }
 }

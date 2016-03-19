@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.bumptech.glide.util.Util;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,6 +105,7 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
             customAdapter.notifyDataSetChanged();
             Log.i(TAG, "Adapter notified");
         }
+        utility.setAllOld(TAG);
 
         Log.d(TAG, "Refresh Complete");
         refreshLayout.setRefreshing(false);
