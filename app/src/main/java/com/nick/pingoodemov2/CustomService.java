@@ -21,7 +21,7 @@ public class CustomService extends Service
     private String[] musicProjection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE};
     private String musicSelection = MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " +
             MediaStore.Audio.Media.DATA + " NOT LIKE ?";
-    private String[] musicSelectionArgs = new String[]{"%WhatsApp%"};
+    private String[] musicSelectionArgs = new String[]{"%Notes%"};
 
 
     private static final String TAG = "Custom_Service";
