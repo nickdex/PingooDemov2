@@ -36,7 +36,13 @@ public class MainActivity extends ViewPagerWithTabsActivity implements ContactFr
                     checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_DENIED)
             {
                 requestPermissions(permissions, PERM_RQ);
+            } else
+            {
+                startService(new Intent(this, CustomService.class));
             }
+        } else
+        {
+            startService(new Intent(this, CustomService.class));
         }
     }
 
