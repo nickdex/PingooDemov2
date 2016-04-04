@@ -1,34 +1,17 @@
 package com.nick.pingoodemov2;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
-
-import com.blunderer.materialdesignlibrary.fragments.ListViewFragment;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -48,9 +31,9 @@ public class MusicFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     private OnMusicFragmentInteractionListener mListener;
 
     private ListView listView;
-    private CustomAdapter customAdapter;
+    private MusicAdapter musicAdapter;
     private SwipeRefreshLayout refreshLayout;
-    private List<CustomItem> musicItems = new ArrayList<>();
+    private List<MusicItem> musicItems = new ArrayList<>();
 
     public MusicFragment()
     {
@@ -79,8 +62,8 @@ public class MusicFragment extends Fragment implements SwipeRefreshLayout.OnRefr
         listView = (ListView) v.findViewById(R.id.music_list);
         refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_music);
         refreshLayout.setOnRefreshListener(this);
-        customAdapter = new CustomAdapter(getActivity(), R.layout.listview_row, musicItems);
-        listView.setAdapter(customAdapter);
+        musicAdapter = new MusicAdapter(getActivity(), R.layout.listview_row, musicItems);
+        listView.setAdapter(musicAdapter);
         return v;
     }
 
@@ -109,12 +92,12 @@ public class MusicFragment extends Fragment implements SwipeRefreshLayout.OnRefr
     public void onRefresh()
     {
         DatabaseUtility utility = DatabaseUtility.newInstance(getContext());
-        List<CustomItem> list = utility.getItemListFromDatabase(TAG);
+        List<MusicItem> list = utility.getMusicItemListFromDatabase();
         if (list != null)
         {
             musicItems.clear();
             musicItems.addAll(list);
-            customAdapter.notifyDataSetChanged();
+            musicAdapter.notifyDataSetChanged();
             Log.i(TAG, "Adapter notified");
         }
         utility.setAllOld(TAG);

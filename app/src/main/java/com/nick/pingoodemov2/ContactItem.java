@@ -3,13 +3,14 @@ package com.nick.pingoodemov2;
 /**
  * Created by nick on 17/3/16.
  */
-public class CustomItem {
+public class ContactItem
+{
     private String id;
 
     private String content;
     private int info;
 
-    public CustomItem(String id, String content, int info)
+    public ContactItem(String id, String content, int info)
     {
         this.id = id;
         this.content = content;

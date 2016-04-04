@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import com.bumptech.glide.util.Util;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,10 +31,10 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
     OnContactFragmentInteractionListener mListener;
 
     private ListView listView;
-    private CustomAdapter customAdapter;
+    private ContactAdapter contactAdapter;
     private SwipeRefreshLayout refreshLayout;
 
-    private List<CustomItem> contactItems = new ArrayList<>();
+    private List<ContactItem> contactItems = new ArrayList<>();
 
 
     public ContactFragment()
@@ -67,8 +65,8 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
         listView = (ListView) v.findViewById(R.id.contact_list);
         refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_contact);
         refreshLayout.setOnRefreshListener(this);
-        customAdapter = new CustomAdapter(getActivity(), R.layout.listview_row, contactItems);
-        listView.setAdapter(customAdapter);
+        contactAdapter = new ContactAdapter(getActivity(), R.layout.listview_row, contactItems);
+        listView.setAdapter(contactAdapter);
         return v;
     }
 
@@ -97,12 +95,12 @@ public class ContactFragment extends Fragment implements SwipeRefreshLayout.OnRe
     public void onRefresh()
     {
         DatabaseUtility utility = DatabaseUtility.newInstance(getContext());
-        List<CustomItem> list = utility.getItemListFromDatabase(TAG);
+        List<ContactItem> list = utility.getContactItemListFromDatabase();
         if (list != null)
         {
             contactItems.clear();
             contactItems.addAll(list);
-            customAdapter.notifyDataSetChanged();
+            contactAdapter.notifyDataSetChanged();
             Log.i(TAG, "Adapter notified");
         }
         utility.setAllOld(TAG);

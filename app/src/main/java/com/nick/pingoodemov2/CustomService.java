@@ -4,12 +4,10 @@ import android.app.Service;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.util.List;
@@ -18,7 +16,7 @@ public class CustomService extends Service
 {
 
     private static final int MUSIC_LOADER = 0;
-    private String[] musicProjection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE};
+    private String[] musicProjection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DATA};
     private String musicSelection = MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " +
             MediaStore.Audio.Media.DATA + " NOT LIKE ?";
     private String[] musicSelectionArgs = new String[]{"%Notes%"};
@@ -39,7 +37,7 @@ public class CustomService extends Service
             Log.i(TAG, "Contact Load finished");
 
             DatabaseUtility utility = DatabaseUtility.newInstance(CustomService.this);
-            List<CustomItem> list = utility.getListFromCursor(data);
+            List<ContactItem> list = utility.getContactListFromCursor(data);
             if (list != null)
             {
                 utility.insertContactList(list);
@@ -55,7 +53,7 @@ public class CustomService extends Service
             Log.i(TAG, "Contact Load finished");
 
             DatabaseUtility utility = DatabaseUtility.newInstance(CustomService.this);
-            List<CustomItem> list = utility.getListFromCursor(data);
+            List<MusicItem> list = utility.getMusicListFromCursor(data);
             if (list != null)
             {
                 utility.insertMusicList(list);

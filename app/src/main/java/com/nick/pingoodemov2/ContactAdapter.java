@@ -12,13 +12,12 @@ import java.util.List;
 /**
  * Created by nick on 17/3/16.
  */
-public class CustomAdapter extends ArrayAdapter<CustomItem> {
-    List<CustomItem> list;
+public class ContactAdapter extends ArrayAdapter<ContactItem> {
     public final static int NEW = 1;
     public final static int DELETED = 2;
     public final static int CHANGED = 3;
 
-    public CustomAdapter(Context context, int resource, List<CustomItem> objects) {
+    public ContactAdapter(Context context, int resource, List<ContactItem> objects) {
         super(context, resource, objects);
     }
 
@@ -31,7 +30,7 @@ public class CustomAdapter extends ArrayAdapter<CustomItem> {
             v = inflater.inflate(R.layout.listview_row, null);
         }
 
-        CustomItem item = getItem(position);
+        ContactItem item = getItem(position);
 
         if(item != null) {
             TextView contentView = (TextView) v.findViewById(R.id.content);
@@ -66,4 +65,6 @@ public class CustomAdapter extends ArrayAdapter<CustomItem> {
 
         return v;
     }
+
+
 }
