@@ -581,7 +581,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
         {
             database.updateWithOnConflict(CONTACT_TABLE, values, ID + " = ?", new String[]{item.getId()}, SQLiteDatabase.CONFLICT_REPLACE);
         }
-        Log.i(TAG, item.toString());
+        Log.v(TAG, item.toString());
     }
 
     private void insertMusicItem(MusicItem item, SQLiteDatabase database)
@@ -600,7 +600,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
         {
             database.updateWithOnConflict(MUSIC_TABLE, values, ID + " = ?", new String[]{item.getId()}, SQLiteDatabase.CONFLICT_REPLACE);
         }
-        Log.i(TAG, item.toString());
+        Log.v(TAG, item.toString());
     }
 
     /**
