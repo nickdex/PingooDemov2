@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
     private final String ID = "_ID";
     private final String TITLE = "NAME";
     private final String PATH = "PATH";
+    private final String NUMBER = "NUMBER";
     private final String IS_NEW = "IS_NEW";
 
     public final static int OLD = 0;
@@ -50,7 +53,8 @@ public class DatabaseUtility extends SQLiteOpenHelper
     public void onCreate(SQLiteDatabase db)
     {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + MUSIC_TABLE + " ( " + ID + " TEXT PRIMARY KEY, " + TITLE + " TEXT, " + PATH + " TEXT, " + IS_NEW + " INTEGER);");
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + CONTACT_TABLE + " ( " + ID + " TEXT PRIMARY KEY, " + TITLE + " TEXT, " + IS_NEW + " INTEGER);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + CONTACT_TABLE + " ( " + ID + " TEXT PRIMARY KEY, " + TITLE + " TEXT, " + NUMBER + " TEXT, " + IS_NEW + " INTEGER);");
+        Log.v(TAG, "Database is created");
     }
 
     @Override
@@ -64,7 +68,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
     public void insertContactList(List<ContactItem> fresh)
     {
         SQLiteDatabase db = getWritableDatabase();
-        Cursor cursor = db.query(CONTACT_TABLE, new String[]{ID, TITLE, IS_NEW}, null, null, null, null, null);
+        Cursor cursor = db.query(CONTACT_TABLE, new String[]{ID, TITLE, NUMBER, IS_NEW}, null, null, null, null, null);
 
         if (cursor != null)
         {
@@ -122,21 +126,6 @@ public class DatabaseUtility extends SQLiteOpenHelper
         db.close();
     }
 
-    public List<ContactItem> getContactItemListFromDatabase()
-    {
-        SQLiteDatabase db = getWritableDatabase();
-        Cursor cursor;
-        cursor = db.query(CONTACT_TABLE, new String[]{ID, TITLE, PATH, IS_NEW}, null, null, null, null, null);
-
-        if (cursor != null)
-        {
-            return getSortedContactList(getContactListFromDatabaseCursorToShow(cursor, db, CONTACT_TABLE));
-        }
-
-        db.close();
-        return null;
-    }
-
     public List<ContactItem> getDeletedContactList()
     {
         return getSpecialisedContactList(DELETED);
@@ -165,10 +154,11 @@ public class DatabaseUtility extends SQLiteOpenHelper
         Cursor cursor = db.query(CONTACT_TABLE, null, IS_NEW + " = " + info_type, null, null, null, TITLE);
         while(cursor.moveToNext())
         {
-            String id = cursor.getString(0);
-            String title = cursor.getString(1);
-            int info = cursor.getInt(2);
-            ContactItem item = new ContactItem(id, title, info);
+            String id = cursor.getString(cursor.getColumnIndex(ID));
+            String title = cursor.getString(cursor.getColumnIndex(TITLE));
+            String number = cursor.getString(cursor.getColumnIndex(NUMBER));
+            int info = cursor.getInt(cursor.getColumnIndex(IS_NEW));
+            ContactItem item = new ContactItem(id, title, number, info);
             list.add(item);
         }
         cursor.close();
@@ -183,16 +173,31 @@ public class DatabaseUtility extends SQLiteOpenHelper
         Cursor cursor = db.query(MUSIC_TABLE, null, IS_NEW + " = " + info_type, null, null, null, TITLE);
         while(cursor.moveToNext())
         {
-            String id = cursor.getString(0);
-            String title = cursor.getString(1);
-            String path = cursor.getString(2);
-            int info = cursor.getInt(3);
+            String id = cursor.getString(cursor.getColumnIndex(ID));
+            String title = cursor.getString(cursor.getColumnIndex(TITLE));
+            String path = cursor.getString(cursor.getColumnIndex(PATH));
+            int info = cursor.getInt(cursor.getColumnIndex(IS_NEW));
             MusicItem item = new MusicItem(id, title, path, info);
             list.add(item);
         }
         cursor.close();
         db.close();
         return list;
+    }
+
+    public List<ContactItem> getContactItemListFromDatabase()
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        Cursor cursor;
+        cursor = db.query(CONTACT_TABLE, new String[]{ID, TITLE, NUMBER, IS_NEW}, null, null, null, null, null);
+
+        if (cursor != null)
+        {
+            return getSortedContactList(getContactListFromDatabaseCursorToShow(cursor, db, CONTACT_TABLE));
+        }
+
+        db.close();
+        return null;
     }
 
 
@@ -403,8 +408,9 @@ public class DatabaseUtility extends SQLiteOpenHelper
             {
                 String id = cursor.getString(0);
                 String title = cursor.getString(1);
-                int info = cursor.getInt(2);
-                ContactItem item = new ContactItem(id, title, info);
+                String number = cursor.getString(2);
+                int info = cursor.getInt(3);
+                ContactItem item = new ContactItem(id, title, number, info);
                 list.add(item);
             }
 
@@ -446,8 +452,9 @@ public class DatabaseUtility extends SQLiteOpenHelper
             {
                 String id = cursor.getString(0);
                 String title = cursor.getString(1);
-                int info = cursor.getInt(2);
-                ContactItem item = new ContactItem(id, title, info);
+                String number = cursor.getString(2);
+                int info = cursor.getInt(3);
+                ContactItem item = new ContactItem(id, title, number, info);
                 list.add(item);
 
                 if (info == DELETED)
@@ -506,8 +513,9 @@ public class DatabaseUtility extends SQLiteOpenHelper
 
                 String id = cursor.getString(0);
                 String title = cursor.getString(1);
+                String number = cursor.getString(2);
                 //OLD doesn't matter it will be replaced later when interacting with database
-                ContactItem item = new ContactItem(id, title, OLD);
+                ContactItem item = new ContactItem(id, title, number, OLD);
                 list.add(item);
             }
 
@@ -563,6 +571,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
         ContentValues values = new ContentValues();
         values.put(ID, item.getId());
         values.put(TITLE, item.getContent());
+        values.put(NUMBER, item.getNumber());
         values.put(IS_NEW, item.getInfo());
 
         try

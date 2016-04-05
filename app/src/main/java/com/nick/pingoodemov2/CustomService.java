@@ -23,7 +23,7 @@ public class CustomService extends Service
 
 
     private static final String TAG = "Custom_Service";
-    private String[] contactProjection = {ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME};
+    private String[] contactProjection = {ContactsContract.CommonDataKinds.Phone._ID, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER};
     private static final int CONTACT_LOADER = 1;
 
     private CursorLoader musicLoader;
@@ -77,11 +77,11 @@ public class CustomService extends Service
         Log.d(TAG, "Contact Loader Created");
         return new CursorLoader(
                 this,
-                ContactsContract.Contacts.CONTENT_URI,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 contactProjection,
                 null,
                 null,
-                ContactsContract.Contacts.DISPLAY_NAME_PRIMARY);
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
 
     }
 

@@ -6,12 +6,13 @@ package com.nick.pingoodemov2;
 public class ContactItem
 {
     private String id;
-
+    private String number;
     private String content;
     private int info;
 
-    public ContactItem(String id, String content, int info)
+    public ContactItem(String id, String content, String number, int info)
     {
+        this.number = number;
         this.id = id;
         this.content = content;
         this.info = info;
@@ -19,7 +20,7 @@ public class ContactItem
 
     @Override
     public String toString() {
-        return this.getContent() + " # " + this.getInfo() + " # " + this.getId();
+        return this.getContent() + " # " + this.getInfo() + " # " + this.getNumber() + " # " + this.getId();
     }
 
     public int getInfo() {
@@ -29,6 +30,11 @@ public class ContactItem
     public String getId()
     {
         return id;
+    }
+
+    public String getNumber()
+    {
+        return number;
     }
 
     public void setId(String id)
