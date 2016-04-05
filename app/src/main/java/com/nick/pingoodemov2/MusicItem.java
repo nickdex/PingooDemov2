@@ -20,7 +20,7 @@ public class MusicItem
 
     @Override
     public String toString() {
-        return this.getContent() + " # " + this.getInfo() + " # " + this.getId();
+        return this.getContent() + " # " + this.getInfo() + " # " + this.getId() + " # " + this.getPath() ;
     }
 
     public int getInfo() {

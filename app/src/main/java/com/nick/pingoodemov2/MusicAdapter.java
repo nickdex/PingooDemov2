@@ -6,7 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -43,7 +45,9 @@ public class MusicAdapter extends ArrayAdapter<MusicItem> {
                     @Override
                     public void onClick(View v)
                     {
-                        String path = item.getPath();
+                        File file = new File(item.getPath());
+                        String md5Hash =  MD5.calculateMD5(file);
+                        Toast.makeText(getContext(),"MD5 Hash is : "+ md5Hash, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
