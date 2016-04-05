@@ -252,7 +252,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
      * @param fresh
      * @return
      */
-    public List<MusicItem> getUpdatedMusicItemList(List<MusicItem> old, List<MusicItem> fresh)
+    private List<MusicItem> getUpdatedMusicItemList(List<MusicItem> old, List<MusicItem> fresh)
     {
         List<MusicItem> oldItems = new ArrayList<>();
         List<MusicItem> changedItems = new ArrayList<>();
@@ -323,7 +323,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
         return null;
     }
 
-    public List<ContactItem> getUpdatedContactItemList(List<ContactItem> old, List<ContactItem> fresh)
+    private List<ContactItem> getUpdatedContactItemList(List<ContactItem> old, List<ContactItem> fresh)
     {
         List<ContactItem> oldItems = new ArrayList<>();
         List<ContactItem> changedItems = new ArrayList<>();
@@ -394,7 +394,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
     }
 
 
-    public List<ContactItem> getContactListFromDatabaseCursorToInsert(Cursor cursor)
+    private List<ContactItem> getContactListFromDatabaseCursorToInsert(Cursor cursor)
     {
         if (cursor != null && cursor.getCount() > 0)
         {
@@ -415,7 +415,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
         }
     }
 
-    public List<MusicItem> getMusicListFromDatabaseCursorToInsert(Cursor cursor)
+    private List<MusicItem> getMusicListFromDatabaseCursorToInsert(Cursor cursor)
     {
         if (cursor != null && cursor.getCount() > 0)
         {
@@ -437,7 +437,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
         }
     }
 
-    public List<ContactItem> getContactListFromDatabaseCursorToShow(Cursor cursor, SQLiteDatabase db, String table)
+    private List<ContactItem> getContactListFromDatabaseCursorToShow(Cursor cursor, SQLiteDatabase db, String table)
     {
         if (cursor != null && cursor.getCount() > 0)
         {
@@ -463,7 +463,7 @@ public class DatabaseUtility extends SQLiteOpenHelper
         }
     }
 
-    public List<MusicItem> getMusicListFromDatabaseCursorToShow(Cursor cursor, SQLiteDatabase db, String table)
+    private List<MusicItem> getMusicListFromDatabaseCursorToShow(Cursor cursor, SQLiteDatabase db, String table)
     {
         if (cursor != null && cursor.getCount() > 0)
         {
@@ -489,6 +489,12 @@ public class DatabaseUtility extends SQLiteOpenHelper
             return null;
         }
     }
+
+    /**
+     * Converts Cursor to equivalent List of ContactItem
+     * @param cursor
+     * @return List containing ContactItem
+     */
 
     public List<ContactItem> getContactListFromCursor(Cursor cursor)
     {
@@ -516,6 +522,12 @@ public class DatabaseUtility extends SQLiteOpenHelper
         return null;
 
     }
+
+    /**
+     * Converts Cursor to equivalent List of ContactItem
+     * @param cursor
+     * @return List containing ContactItem
+     */
 
     public List<MusicItem> getMusicListFromCursor(Cursor cursor)
     {
@@ -582,6 +594,10 @@ public class DatabaseUtility extends SQLiteOpenHelper
         Log.i(TAG, item.toString());
     }
 
+    /**
+     * sets IS_NEW Column of the given table to OLD for all items
+     * @param Tag
+     */
     public void setAllOld(String Tag)
     {
         SQLiteDatabase db = getWritableDatabase();
