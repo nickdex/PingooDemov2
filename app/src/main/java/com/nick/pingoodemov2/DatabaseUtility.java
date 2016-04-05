@@ -137,6 +137,65 @@ public class DatabaseUtility extends SQLiteOpenHelper
         return null;
     }
 
+    public List<ContactItem> getDeletedContactList()
+    {
+        return getSpecialisedContactList(DELETED);
+    }
+
+    public List<MusicItem> getDeletedMusicList()
+    {
+        return getSpecialisedMusicList(DELETED);
+    }
+
+    public List<ContactItem> getNewContactList()
+    {
+        return getSpecialisedContactList(NEW);
+    }
+
+    public List<MusicItem> getNewMusicList()
+    {
+        return getSpecialisedMusicList(NEW);
+    }
+
+
+    private List<ContactItem> getSpecialisedContactList(int info_type)
+    {
+        SQLiteDatabase db = getReadableDatabase();
+        List<ContactItem> list = new ArrayList<>();
+        Cursor cursor = db.query(CONTACT_TABLE, null, IS_NEW + " = " + info_type, null, null, null, TITLE);
+        while(cursor.moveToNext())
+        {
+            String id = cursor.getString(0);
+            String title = cursor.getString(1);
+            int info = cursor.getInt(2);
+            ContactItem item = new ContactItem(id, title, info);
+            list.add(item);
+        }
+        cursor.close();
+        db.close();
+        return list;
+    }
+
+    private List<MusicItem> getSpecialisedMusicList(int info_type)
+    {
+        SQLiteDatabase db = getReadableDatabase();
+        List<MusicItem> list = new ArrayList<>();
+        Cursor cursor = db.query(MUSIC_TABLE, null, IS_NEW + " = " + info_type, null, null, null, TITLE);
+        while(cursor.moveToNext())
+        {
+            String id = cursor.getString(0);
+            String title = cursor.getString(1);
+            String path = cursor.getString(2);
+            int info = cursor.getInt(3);
+            MusicItem item = new MusicItem(id, title, path, info);
+            list.add(item);
+        }
+        cursor.close();
+        db.close();
+        return list;
+    }
+
+
     public List<MusicItem> getMusicItemListFromDatabase()
     {
         SQLiteDatabase db = getWritableDatabase();
